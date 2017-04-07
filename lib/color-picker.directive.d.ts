@@ -1,9 +1,9 @@
 import { OnChanges, ViewContainerRef, ElementRef, EventEmitter, OnInit } from '@angular/core';
 import { ColorPickerService } from './color-picker.service';
 import { Rgba, Hsla, Hsva, SliderPosition, SliderDimension } from './classes';
-import { Compiler } from '@angular/core';
+import { ComponentFactoryResolver } from '@angular/core';
 export declare class ColorPickerDirective implements OnInit, OnChanges {
-    private compiler;
+    private componentFactoryResolver;
     private vcRef;
     private el;
     private service;
@@ -33,7 +33,7 @@ export declare class ColorPickerDirective implements OnInit, OnChanges {
     private dialog;
     private created;
     private ignoreChanges;
-    constructor(compiler: Compiler, vcRef: ViewContainerRef, el: ElementRef, service: ColorPickerService);
+    constructor(componentFactoryResolver: ComponentFactoryResolver, vcRef: ViewContainerRef, el: ElementRef, service: ColorPickerService);
     ngOnChanges(changes: any): void;
     ngOnInit(): void;
     onClick(): void;

@@ -1,8 +1,8 @@
 import {Component, OnChanges, Directive, Input, Output, ViewContainerRef, ElementRef, EventEmitter, OnInit, ViewChild} from '@angular/core';
 import {ColorPickerService} from './color-picker.service';
 import {Rgba, Hsla, Hsva, SliderPosition, SliderDimension} from './classes';
-import {NgModule, Compiler, ReflectiveInjector} from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import {NgModule, Compiler, ReflectiveInjector,ComponentFactoryResolver} from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
 
 @Directive({
     selector: '[colorPicker]',
@@ -40,7 +40,7 @@ export class ColorPickerDirective implements OnInit, OnChanges {
     private created: boolean;
     private ignoreChanges: boolean = false;
 
-    constructor(private compiler: Compiler, private vcRef: ViewContainerRef, private el: ElementRef, private service: ColorPickerService) {
+    constructor(private componentFactoryResolver: ComponentFactoryResolver,private vcRef: ViewContainerRef, private el: ElementRef, private service: ColorPickerService) {
         this.created = false;
     }
 
@@ -79,8 +79,18 @@ export class ColorPickerDirective implements OnInit, OnChanges {
     openDialog() {
         if (!this.created) {
             this.created = true;
-            this.compiler.compileModuleAndAllComponentsAsync(DynamicCpModule)
-                .then(factory => {
+            const factory = this.componentFactoryResolver.resolveComponentFactory(DialogComponent);
+            const injector = ReflectiveInjector.fromResolvedProviders([], this.vcRef.parentInjector);
+            const cmpRef = this.vcRef.createComponent(factory, 0, injector, []);
+
+            cmpRef.instance.setDialog(this, this.el, this.colorPicker, this.cpPosition, this.cpPositionOffset,
+                this.cpPositionRelativeToArrow, this.cpOutputFormat, this.cpPresetLabel, this.cpPresetColors,
+                this.cpCancelButton, this.cpCancelButtonClass, this.cpCancelButtonText,
+                this.cpOKButton, this.cpOKButtonClass, this.cpOKButtonText, this.cpHeight, this.cpWidth,
+                this.cpIgnoredElements, this.cpDialogDisplay, this.cpSaveClickOutside, this.cpAlphaChannel);
+
+            this.dialog = cmpRef.instance;
+      /*      this.compiler.compileModuleAndAllComponentsAsync(DynamicCpModule).then(factory => {
                     const compFactory = factory.componentFactories.find(x => x.componentType === DialogComponent);
                     const injector = ReflectiveInjector.fromResolvedProviders([], this.vcRef.parentInjector);
                     const cmpRef = this.vcRef.createComponent(compFactory, 0, injector, []);
@@ -90,7 +100,7 @@ export class ColorPickerDirective implements OnInit, OnChanges {
                         this.cpOKButton, this.cpOKButtonClass, this.cpOKButtonText, this.cpHeight, this.cpWidth,
                         this.cpIgnoredElements, this.cpDialogDisplay, this.cpSaveClickOutside, this.cpAlphaChannel);
                     this.dialog = cmpRef.instance;
-                });
+                });*/
         } else if (this.dialog) {
             this.dialog.openDialog(this.colorPicker);
         }
@@ -202,7 +212,6 @@ export class SliderDirective {
     templateUrl: './templates/default/color-picker.html',
     styleUrls: ['./templates/default/color-picker.css']
 })
-
 export class DialogComponent implements OnInit {
     public hsva: Hsva;
     public rgbaText: Rgba;
